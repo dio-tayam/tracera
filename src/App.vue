@@ -2,9 +2,13 @@
 import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import { useUiStore } from '@/stores/ui'
+import { useCongratsModal } from '@/composables/useCongratsModal'
 import ToastContainer from '@/components/common/ToastContainer.vue'
+import CongratsModal from '@/components/common/CongratsModal.vue'
 
 const ui = useUiStore()
+const { visible, companyName, jobTitle, dismiss } = useCongratsModal()
+
 onMounted(() => ui.initDarkMode())
 </script>
 
@@ -15,7 +19,15 @@ onMounted(() => ui.initDarkMode())
         <component :is="Component" :key="route.path" />
       </Transition>
     </RouterView>
+
     <ToastContainer />
+
+    <CongratsModal
+      v-if="visible"
+      :company-name="companyName"
+      :job-title="jobTitle"
+      @close="dismiss"
+    />
   </div>
 </template>
 
@@ -27,6 +39,6 @@ onMounted(() => ui.initDarkMode())
 .page-enter-from,
 .page-leave-to {
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(5px);
 }
 </style>

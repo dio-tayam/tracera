@@ -1,6 +1,6 @@
-export const STATUSES = ['Applied', 'Interview', 'Offer', 'Rejected', 'Ghosted', 'Withdrawn']
-export const PRIORITIES = ['Low', 'Medium', 'High']
-export const WORK_SETUPS = ['Remote', 'Hybrid', 'On-site']
+export const STATUSES        = ['Applied', 'Interview', 'Offer', 'Rejected', 'Ghosted', 'Withdrawn']
+export const PRIORITIES      = ['Low', 'Medium', 'High']
+export const WORK_SETUPS     = ['Remote', 'Hybrid', 'On-site']
 export const EMPLOYMENT_TYPES = ['Full-time', 'Part-time', 'Contract', 'Freelance']
 export const MOODS = ['😊', '😐', '😟', '🤔', '😤', '🥳', '😔', '💪', '🎯', '😅']
 
@@ -19,97 +19,119 @@ export const PRIORITY_CONFIG = {
   High:   { bg: 'bg-red-100',    text: 'text-red-800',    darkBg: 'dark:bg-red-900/40',    darkText: 'dark:text-red-300'    }
 }
 
+// ─── Timezone-safe local date string ─────────────────────────────────────────
+// Always uses the local calendar date, never UTC — avoids off-by-one day bugs
+export function localDateStr(d = new Date()) {
+  const y  = d.getFullYear()
+  const m  = String(d.getMonth() + 1).padStart(2, '0')
+  const dy = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${dy}`
+}
+
+// Extract YYYY-MM-DD from a Supabase date string (already in YYYY-MM-DD form)
+export function appDateStr(dateField) {
+  if (!dateField) return null
+  return String(dateField).slice(0, 10)
+}
+
+// ─── Date formatting ──────────────────────────────────────────────────────────
 export function formatDate(dateStr) {
   if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric'
-  })
+  const [y, m, d] = String(dateStr).slice(0, 10).split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 }
 
 export function formatDateShort(dateStr) {
   if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const [y, m, d] = String(dateStr).slice(0, 10).split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 export function formatDateTime(dateStr) {
   if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleString('en-US', {
-    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-  })
+  return new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 export function toInputDate(dateStr) {
   if (!dateStr) return ''
-  const d = new Date(dateStr)
-  return d.toISOString().split('T')[0]
+  return String(dateStr).slice(0, 10)
 }
 
 export function todayISO() {
-  return new Date().toISOString().split('T')[0]
+  return localDateStr()
 }
 
 export function isOverdue(dateStr) {
   if (!dateStr) return false
-  return new Date(dateStr) < new Date(new Date().toDateString())
+  return appDateStr(dateStr) < localDateStr()
 }
 
 export function isDueToday(dateStr) {
   if (!dateStr) return false
-  return new Date(dateStr).toDateString() === new Date().toDateString()
+  return appDateStr(dateStr) === localDateStr()
 }
 
 export function daysDiff(dateStr) {
   if (!dateStr) return null
-  return Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
-}
-
-export function getWeekStart() {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  const day = d.getDay()
-  d.setDate(d.getDate() - (day === 0 ? 6 : day - 1))
-  return d
-}
-
-export function getCurrentStreak(applications) {
-  const appliedDates = [...new Set(
-    applications
-      .filter(a => a.date_applied)
-      .map(a => new Date(a.date_applied).toDateString())
-  )].sort((a, b) => new Date(b) - new Date(a))
-
-  if (!appliedDates.length) return 0
-
-  let streak = 0
-  let cursor = new Date()
-  cursor.setHours(0, 0, 0, 0)
-
-  for (const dateStr of appliedDates) {
-    const d = new Date(dateStr)
-    const diff = Math.round((cursor - d) / 86400000)
-    if (diff === 0 || diff === 1) {
-      streak++
-      cursor = d
-    } else {
-      break
-    }
-  }
-
-  return streak
-}
-
-export function getLast7Days() {
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date()
-    d.setDate(d.getDate() - (6 - i))
-    d.setHours(0, 0, 0, 0)
-    return d
-  })
+  const [y, m, d] = String(dateStr).slice(0, 10).split('-').map(Number)
+  const then = new Date(y, m - 1, d)
+  const now  = new Date()
+  now.setHours(0, 0, 0, 0)
+  return Math.floor((now - then) / 86400000)
 }
 
 export function formatSalary(min, max) {
   if (!min && !max) return '—'
   const fmt = n => '$' + Number(n).toLocaleString()
   if (min && max) return `${fmt(min)} – ${fmt(max)}`
-  return min ? `From ${fmt(min)}` : `Up to ${fmt(max)}`
+  return min ? `from ${fmt(min)}` : `up to ${fmt(max)}`
+}
+
+// ─── Last 7 calendar days as local date strings ───────────────────────────────
+export function getLast7Days() {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (6 - i))
+    return { str: localDateStr(d), label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }
+  })
+}
+
+// ─── Monday of the current week as local date string ─────────────────────────
+export function getWeekStart() {
+  const now = new Date()
+  const day = now.getDay()
+  const diff = day === 0 ? -6 : 1 - day
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff)
+  return localDateStr(monday)
+}
+
+// ─── Consecutive-day streak from a list of applications ──────────────────────
+export function getCurrentStreak(applications) {
+  // Collect unique applied dates as local YYYY-MM-DD strings, newest first
+  const dates = [...new Set(
+    applications.filter(a => a.date_applied).map(a => appDateStr(a.date_applied))
+  )].sort().reverse()
+
+  if (!dates.length) return 0
+
+  let streak = 0
+  let cursor = localDateStr() // today as local date string
+
+  for (const dateStr of dates) {
+    // Parse both as local dates to avoid UTC shift
+    const [cy, cm, cd] = cursor.split('-').map(Number)
+    const [dy, dm, dd] = dateStr.split('-').map(Number)
+    const cursorMs = new Date(cy, cm - 1, cd).getTime()
+    const dateMs   = new Date(dy, dm - 1, dd).getTime()
+    const diffDays = Math.round((cursorMs - dateMs) / 86400000)
+
+    if (diffDays === 0 || diffDays === 1) {
+      streak++
+      cursor = dateStr
+    } else {
+      break
+    }
+  }
+
+  return streak
 }

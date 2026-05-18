@@ -2,25 +2,23 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from './auth'
+import { useCongratsModal } from '@/composables/useCongratsModal'
 
 export const useApplicationsStore = defineStore('applications', () => {
   const applications = ref([])
-  const loading = ref(false)
-  const error = ref(null)
+  const loading      = ref(false)
+  const error        = ref(null)
 
   async function fetchApplications() {
     loading.value = true
-    error.value = null
+    error.value   = null
     const { data, error: err } = await supabase
       .from('applications')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (err) {
-      error.value = err.message
-    } else {
-      applications.value = data ?? []
-    }
+    if (err) { error.value = err.message }
+    else      { applications.value = data ?? [] }
     loading.value = false
   }
 
@@ -38,17 +36,21 @@ export const useApplicationsStore = defineStore('applications', () => {
 
     await supabase.from('status_timeline').insert({
       application_id: data.id,
-      user_id: auth.user.id,
-      status: data.status,
-      note: 'Application created'
+      user_id:        auth.user.id,
+      status:         data.status,
+      note:           'Application created'
     })
+
+    if (data.status === 'Offer') {
+      useCongratsModal().celebrate(data.company_name, data.job_title)
+    }
 
     return data
   }
 
   async function updateApplication(id, updates) {
     const auth = useAuthStore()
-    const old = applications.value.find(a => a.id === id)
+    const old  = applications.value.find(a => a.id === id)
     const { _mood, _note, ...fields } = updates
 
     const { data, error: err } = await supabase
@@ -63,14 +65,20 @@ export const useApplicationsStore = defineStore('applications', () => {
     const idx = applications.value.findIndex(a => a.id === id)
     if (idx !== -1) applications.value[idx] = data
 
-    if (fields.status && old?.status !== fields.status) {
+    const statusChanged = fields.status && old?.status !== fields.status
+
+    if (statusChanged) {
       await supabase.from('status_timeline').insert({
         application_id: id,
-        user_id: auth.user.id,
-        status: fields.status,
-        mood: _mood ?? null,
-        note: _note ?? null
+        user_id:        auth.user.id,
+        status:         fields.status,
+        mood:           _mood ?? null,
+        note:           _note ?? null
       })
+
+      if (fields.status === 'Offer') {
+        useCongratsModal().celebrate(data.company_name, data.job_title)
+      }
     }
 
     return data
@@ -111,11 +119,7 @@ export const useApplicationsStore = defineStore('applications', () => {
     const auth = useAuthStore()
     const { data, error: err } = await supabase
       .from('status_timeline')
-      .insert({
-        application_id: applicationId,
-        user_id: auth.user.id,
-        ...entry
-      })
+      .insert({ application_id: applicationId, user_id: auth.user.id, ...entry })
       .select()
       .single()
 
@@ -124,15 +128,8 @@ export const useApplicationsStore = defineStore('applications', () => {
   }
 
   return {
-    applications,
-    loading,
-    error,
-    fetchApplications,
-    addApplication,
-    updateApplication,
-    deleteApplication,
-    bulkDelete,
-    fetchTimeline,
-    addTimelineEntry
+    applications, loading, error,
+    fetchApplications, addApplication, updateApplication,
+    deleteApplication, bulkDelete, fetchTimeline, addTimelineEntry
   }
 })
