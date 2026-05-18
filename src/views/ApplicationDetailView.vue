@@ -140,30 +140,35 @@ async function handleDelete() {
             <!-- Key details -->
             <div class="card p-5">
               <h3 class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Details</h3>
-              <dl class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <div>
+              <dl class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                <div class="min-w-0">
                   <dt class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Date Applied</dt>
                   <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ formatDate(app.date_applied) }}</dd>
                 </div>
-                <div>
+                <div class="min-w-0">
                   <dt class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Salary Range</dt>
                   <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ formatSalary(app.salary_min, app.salary_max) }}</dd>
                 </div>
-                <div v-if="app.interview_date">
+                <div v-if="app.interview_date" class="min-w-0">
                   <dt class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Interview Date</dt>
                   <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ formatDateTime(app.interview_date) }}</dd>
                 </div>
-                <div v-if="app.followup_date">
+                <div v-if="app.followup_date" class="min-w-0">
                   <dt class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Follow-up Date</dt>
                   <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ formatDate(app.followup_date) }}</dd>
                 </div>
-                <div v-if="app.contact_name">
+                <div v-if="app.contact_name" class="min-w-0">
                   <dt class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Contact</dt>
-                  <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ app.contact_name }}</dd>
+                  <dd class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ app.contact_name }}</dd>
                 </div>
-                <div v-if="app.contact_email">
+                <div v-if="app.contact_email" class="min-w-0 overflow-hidden">
                   <dt class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Contact Email</dt>
-                  <dd class="text-sm"><a :href="`mailto:${app.contact_email}`" class="text-blue-600 dark:text-blue-400 hover:underline">{{ app.contact_email }}</a></dd>
+                  <dd class="text-sm min-w-0">
+                    <a
+                      :href="`mailto:${app.contact_email}`"
+                      class="text-blue-600 dark:text-blue-400 hover:underline break-all"
+                    >{{ app.contact_email }}</a>
+                  </dd>
                 </div>
               </dl>
             </div>

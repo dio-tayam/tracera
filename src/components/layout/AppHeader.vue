@@ -19,18 +19,21 @@ async function handleLogout() {
 const navLinks = [
   { name: 'dashboard',    label: 'Dashboard' },
   { name: 'applications', label: 'Applications' },
-  { name: 'insights',     label: 'Insights' },
-  { name: 'settings',     label: 'Settings' }
+  { name: 'favourites',   label: 'Favourites' },
+  { name: 'insights',     label: 'Insights' }
 ]
 </script>
 
 <template>
   <header class="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-15 py-0" style="height:60px">
+      <div class="flex items-center justify-between" style="height:60px">
 
-        <!-- Brand — text only -->
-        <RouterLink :to="{ name: 'dashboard' }" class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
+        <!-- Brand -->
+        <RouterLink
+          :to="{ name: 'dashboard' }"
+          class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+        >
           Tracera
         </RouterLink>
 
@@ -50,16 +53,15 @@ const navLinks = [
         <!-- Right actions -->
         <div class="flex items-center gap-1.5">
 
-          <!-- New application (desktop) -->
+          <!-- New application — visible on all sizes, text hidden on mobile -->
           <RouterLink
             :to="{ name: 'add-application' }"
-            class="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
+            class="inline-flex items-center gap-1.5 px-3 py-2 md:px-3.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm"
           >
-            <!-- Heroicon: plus -->
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
             </svg>
-            New
+            <span class="hidden md:inline">New</span>
           </RouterLink>
 
           <!-- Avatar + dropdown -->
@@ -74,7 +76,6 @@ const navLinks = [
                 class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
                 {{ auth.displayName.charAt(0).toUpperCase() }}
               </div>
-              <!-- Heroicon: chevron-down -->
               <svg class="w-3.5 h-3.5 text-gray-400 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/>
               </svg>
@@ -84,12 +85,13 @@ const navLinks = [
               <div v-if="menuOpen"
                 class="absolute right-0 top-full mt-2 w-60 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 py-1.5 z-50">
 
+                <!-- User info -->
                 <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
                   <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ auth.displayName }}</p>
                   <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{{ auth.user?.email }}</p>
                 </div>
 
-                <!-- Mobile nav links in dropdown -->
+                <!-- Mobile nav links -->
                 <div class="md:hidden py-1 border-b border-gray-100 dark:border-gray-800">
                   <RouterLink v-for="link in navLinks" :key="link.name"
                     :to="{ name: link.name }"
@@ -99,6 +101,7 @@ const navLinks = [
                   </RouterLink>
                 </div>
 
+                <!-- Settings + sign out -->
                 <div class="py-1">
                   <RouterLink :to="{ name: 'settings' }"
                     class="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
@@ -114,7 +117,6 @@ const navLinks = [
                   <button
                     class="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                     @click="handleLogout">
-                    <!-- Heroicon: arrow-right-on-rectangle -->
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
                     </svg>
