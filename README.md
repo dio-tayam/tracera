@@ -136,33 +136,6 @@ One row per user storing their weekly application goal.
 
 ---
 
-## Deploying to Vercel
-
-1. Push the repo to GitHub
-2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import from GitHub
-3. Set the **Framework Preset** to **Vite**
-4. Add environment variables in the Vercel dashboard:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-5. Click **Deploy** — done!
-
-For custom domains, set up in **Vercel → Domains** and update the OAuth redirect URI in Google Cloud Console and Supabase.
-
----
-
-## Deploying to Netlify
-
-1. Build command: `npm run build`
-2. Publish directory: `dist`
-3. Add environment variables in **Site settings → Environment variables**
-4. Add a `_redirects` file in the `public/` folder for SPA routing:
-
-```
-/* /index.html 200
-```
-
----
-
 ## Export Formats
 
 All exports are completely free — no third-party libraries.
@@ -176,7 +149,3 @@ All exports are completely free — no third-party libraries.
 PDF exports use the browser's built-in print API — when the print dialog opens, choose **"Save as PDF"**.
 
 ---
-
-## License
-
-MIT — free to use, modify, and deploy.
